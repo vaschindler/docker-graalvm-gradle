@@ -63,6 +63,6 @@ jobs:
             
               echo "Pushing image: $dir"
             
-              docker buildx build -t username/$dir:$image_tag --push ./$dir
+              docker buildx build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:$image_tag --push ./$dir
             done
 
