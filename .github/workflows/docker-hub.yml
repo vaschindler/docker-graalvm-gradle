@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -15,23 +12,6 @@ env:
   IMAGE_NAME: graalvm-gradle
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build Docker images
-        run: |
-          for dir in */; do
-            dir=${dir%*/} # Remove trailing slash
-            image_tag=${dir##*/} # Extract subdirectory name as image tag
-
-            echo "Building image: $dir"
-
-            docker buildx build -t your-dockerhub-username/$dir:$image_tag --load ./$dir
-          done
   push_to_registry:
     needs: build
     name: Push Docker image to Docker Hub
@@ -49,17 +29,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
       - name: Push Docker images
         run: |
             for dir in */; do
-              dir=${dir%*/} # Remove trailing slash
-              image_tag=${dir##*/} # Extract subdirectory name as image tag
+              dir=${dir%*/}
+              image_tag=${dir##*/}
             
               echo "Pushing image: $dir"
             
